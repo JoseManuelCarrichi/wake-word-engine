@@ -28,7 +28,6 @@ import argparse
 import time
 import os
 
-
 class Listener:
 
     def __init__(self, args):
@@ -50,7 +49,6 @@ class Listener:
             output=True,
             frames_per_buffer=self.chunk)
 
-
     def save_audio(self, file_name, frames):
         print('saving file to {}'.format(file_name))
         self.stream.stop_stream() # Detiene la captura de audio
@@ -71,7 +69,6 @@ class Listener:
         wf.writeframes(b"".join(frames))
         # Cierra el archivo
         wf.close()
-
 
 def interactive(args):
     index = 0
@@ -109,7 +106,6 @@ def generate_file_name(file_path):
             return file_name
         index += 1
 
-
 def main(args):
     listener = Listener(args) # Crea una instancia de la clase Listener
     frames = [] # Inicializa una lista para almacenar los fragmentos de audio
@@ -136,8 +132,6 @@ def main(args):
     save_path = os.path.join(args.save_path, "{}.wav".format(generate_file_name(args.save_path)))
     listener.save_audio(save_path, frames)
     
-    #listener.save_audio(args.save_path, frames)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Grabaciones de audio para entrenamiento de palabras de activación")
@@ -163,4 +157,3 @@ if __name__ == "__main__":
         if args.save_path is None:
             raise Exception('need to set --save_path')
         main(args)
-
