@@ -6,13 +6,20 @@ from pydub.utils import make_chunks
 def main(args):
 
     def chunk_and_save(file):
+         # Cargar el archivo de audio
         audio = AudioSegment.from_file(file)
-        length = args.seconds * 1000 # this is in miliseconds
+        # Calcular la longitud de cada fragmento en milisegundos
+        length = args.seconds * 1000 
+        # Dividir el archivo de audio en fragmentos
         chunks = make_chunks(audio, length)
         names = []
+        # Iterar sobre los fragmentos y guardarlos como archivos WAV
         for i, chunk in enumerate(chunks):
-            _name = file.split("/")[-1]
+            # Obtener el nombre del archivo sin la ruta
+            _name = file.split("/")[-1] 
+            # Crear un nombre único para el fragmento
             name = "{}_{}".format(i, _name)
+            # Ruta completa para guardar el fragmento
             wav_path = os.path.join(args.save_path, name)
             chunk.export(wav_path, format="wav")
         return names

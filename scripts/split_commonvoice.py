@@ -7,14 +7,19 @@ from pydub.utils import make_chunks
 # pandarallel.initialize(progress_bar=True)
 
 def main(args):
+     # Leer el archivo CSV que contiene información sobre los archivos de audio separados por una tabulación
     df = pd.read_csv(args.file_name, sep='\t')
+    # Imprimir las primeras filas del DataFrame y el tamaño total de los datos
     print(df.head())
     print('total data size:', len(df))
 
+    # Función para dividir y guardar un archivo de audio en fragmentos
     def chunk_and_save(file):
+
         path = os.path.join(args.data_path, file)
         audio = AudioSegment.from_file(path)
-        length = args.seconds * 1000 # this is in miliseconds
+        length = args.seconds * 1000 # Calcular la longitud de cada fragmento en milisegundos
+        # Dividir el archivo de audio en fragmentos
         chunks = make_chunks(audio, length)
         names = []
         for i, chunk in enumerate(chunks):
@@ -22,15 +27,18 @@ def main(args):
             name = "{}_{}".format(i, _name)
             wav_path = os.path.join(args.save_path, name)
             chunk.export(wav_path, format="wav")
-        return names
+        return 
+    # Aplicar la función a cada fila del DataFrame
     df.path.apply(lambda x: chunk_and_save(x))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="script to split common voice data into chunks")
     parser.add_argument('--seconds', type=int, default=None,
                         help='if set to None, then will record forever until keyboard interrupt')
+    # --daa_path: ruta completa a los datos de audio
     parser.add_argument('--data_path', type=str, default=None, required=True,
                         help='full path to data. i.e. /to/path/clips/')
+    # --file_name: nombre del archivo csv que contiene la información sobre los archivos de audio 
     parser.add_argument('--file_name', type=str, default=None, required=True,
                         help='common voice file')
     parser.add_argument('--save_path', type=str, default=None, required=True,
