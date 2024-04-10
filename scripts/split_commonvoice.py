@@ -3,9 +3,14 @@ import pandas as pd
 import argparse
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-# from pandarallel import pandarallel
-# pandarallel.initialize(progress_bar=True)
+'''
+El dataset Common Voice es un dataset de Mozilla que contiene datos de voz en varios idiomas.
+La version en español cv-corpus-17.0-delta-2024-03-15 contiene un archivo con información sobre los archivos de audio
 
+Internamente contiene las siguientes columnas:
+- clip: nombre del archivo de audio
+- duration: duración del archivo de audio
+'''
 def main(args):
      # Leer el archivo CSV que contiene información sobre los archivos de audio separados por una tabulación
     df = pd.read_csv(args.file_name, sep='\t')
@@ -28,14 +33,14 @@ def main(args):
             wav_path = os.path.join(args.save_path, name)
             chunk.export(wav_path, format="wav")
         return 
-    # Aplicar la función a cada fila del DataFrame
-    df.path.apply(lambda x: chunk_and_save(x))
+    # Aplicar la función a cada fila (clip) del DataFrame
+    df.clip.apply(lambda x: chunk_and_save(x))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="script to split common voice data into chunks")
     parser.add_argument('--seconds', type=int, default=None,
                         help='if set to None, then will record forever until keyboard interrupt')
-    # --daa_path: ruta completa a los datos de audio
+    # --data_path: ruta completa a los datos de audio
     parser.add_argument('--data_path', type=str, default=None, required=True,
                         help='full path to data. i.e. /to/path/clips/')
     # --file_name: nombre del archivo csv que contiene la información sobre los archivos de audio 
