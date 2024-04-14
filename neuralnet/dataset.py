@@ -5,7 +5,7 @@ import torchaudio
 import pandas as pd
 from sonopy import power_spec, mel_spec, mfcc_spec, filterbanks
 
-
+# Clase para calcular los coeficientes cepstrales de frecuencia mel (MFCC) de una señal de audio
 class MFCC(nn.Module):
 
     def __init__(self, sample_rate, fft_size=400, window_stride=(400, 200), num_filt=40, num_coeffs=40):
@@ -20,14 +20,16 @@ class MFCC(nn.Module):
             self.fft_size, self.num_filt, self.num_coeffs
         )
     
+    # Función para obtener un objeto MFCC para un sample_rate dado
     def forward(self, x):
+        # Calcula los MFCC y ajusta la forma del tensor resultante
         return torch.Tensor(self.mfcc(x.squeeze(0).numpy())).transpose(0, 1).unsqueeze(0)
 
 
 def get_featurizer(sample_rate):
     return MFCC(sample_rate=sample_rate)
 
-
+# Clase para cortar aleatoriamente el inicio o final de una señal de audio
 class RandomCut(nn.Module):
     """Augmentation technique that randomly cuts start or end of audio"""
 
@@ -44,7 +46,7 @@ class RandomCut(nn.Module):
         elif side == 1:
             return x[cut:,:,:]
 
-
+# Clase para aplicar máscaras en el dominio de tiempo o frecuencia de una señal de audio
 class SpecAugment(nn.Module):
     """Augmentation technique to add masking on the time or frequency domain"""
 
@@ -53,6 +55,7 @@ class SpecAugment(nn.Module):
 
         self.rate = rate
 
+        # Se definen las transformaciones de máscara de frecuencia y tiempo
         self.specaug = nn.Sequential(
             torchaudio.transforms.FrequencyMasking(freq_mask_param=freq_mask),
             torchaudio.transforms.TimeMasking(time_mask_param=time_mask)
@@ -65,6 +68,7 @@ class SpecAugment(nn.Module):
             torchaudio.transforms.TimeMasking(time_mask_param=time_mask)
         )
 
+        # Selecciona la política de aumento de datos a aplicar
         policies = { 1: self.policy1, 2: self.policy2, 3: self.policy3 }
         self._forward = policies[policy]
 
@@ -89,7 +93,7 @@ class SpecAugment(nn.Module):
             return self.policy1(x)
         return self.policy2(x)
 
-
+# Clase para cargar y procesar datos de palabras clave ("wakewords")
 class WakeWordData(torch.utils.data.Dataset):
     """Load and process wakeword data"""
 
@@ -128,6 +132,7 @@ class WakeWordData(torch.utils.data.Dataset):
 
 rand_cut = RandomCut(max_cut=10)
 
+# Función para agrupar y rellenar lotes de datos de palabras clave
 def collate_fn(data):
     """Batch and pad wakeword data"""
     mfccs = []
@@ -137,7 +142,7 @@ def collate_fn(data):
         mfccs.append(mfcc.squeeze(0).transpose(0, 1))
         labels.append(label)
 
-    # pad mfccs to ensure all tensors are same size in the time dim
+    # Se rellenan los MFCC para que todos los tensores tengan la misma longitud temporal
     mfccs = nn.utils.rnn.pad_sequence(mfccs, batch_first=True)  # batch, seq_len, feature
     mfccs = mfccs.transpose(0, 1) # seq_len, batch, feature
     mfccs = rand_cut(mfccs)

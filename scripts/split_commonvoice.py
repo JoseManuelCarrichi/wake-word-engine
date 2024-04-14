@@ -34,7 +34,7 @@ def main(args):
             chunk.export(wav_path, format="wav")
         return 
     # Aplicar la función a cada fila (clip) del DataFrame
-    df.clip.apply(lambda x: chunk_and_save(x))
+    df.path.apply(lambda x: chunk_and_save(x))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="script to split common voice data into chunks")

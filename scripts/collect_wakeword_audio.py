@@ -78,8 +78,8 @@ def interactive(args):
             frames = [] # Inicializa una lista para almacenar los fragmentos de audio
             
             # Mensaje para indicar al usuario que comience a grabar
-            print('Iniciando grabación....')
             input('Presiona Enter para continuar. La grabación será de {} segundos. Presiona Ctrl + C para salir'.format(args.seconds))
+            print('Iniciando grabación....')
             # Espera 0.2 segundos para evitar que el micrófono capte el sonido del clic al presionar Enter
             time.sleep(0.2)  
             
