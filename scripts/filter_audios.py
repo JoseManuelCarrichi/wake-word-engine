@@ -27,19 +27,20 @@ def filtrarAudio(audioPath, filenamePath, filterPath):
     Audio,sample_rate = sf.read(audioPath)
     # Aplicar filtro    
     AudioFiltrado = lfilter(win, 1, Audio)
-    sf.write(filenamePath,AudioFiltrado,sample_rate)
+    sf.write(filenamePath,AudioFiltrado,sample_rate,format='wav')
     
 
 def main(args):
     # Leer los audios de la carpeta
     index = 0
+    total = len(os.listdir(args.mainPath))
     for filename in os.listdir(args.mainPath):
         audioPath = os.path.join(args.mainPath, filename)
-        filenamePath = os.path.join(args.savePath, f"{args.label}_{index}'.wav'" )
+        filenamePath = os.path.join(args.savePath, f"{args.label}_{index}.wav" )
         # Filtrar audio
         filtrarAudio(audioPath, filenamePath, args.filterPath)
+        print(f"Audio: {index} de {total}")
         index += 1
-        if index >= 10 : break
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Filtrar audio")
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('--order', type=int, default=100, help="Orden del filtro")
     parser.add_argument('--low_frequency', type=int, default=300, help="Frecuencia de corte baja")
     parser.add_argument('--high_frequency', type=int, default=3800, help="Frecuencia de corte alta")
-    parser.add_argument('--label', type=str, default=None, help="Etiqueta del audio")
+    parser.add_argument('--label', type=int, default=0, help="Etiqueta del audio")
 
     args = parser.parse_args()
     # Si no se le pasa la frecuencia de muestreo, se filtra el audio
