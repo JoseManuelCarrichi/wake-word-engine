@@ -117,10 +117,13 @@ class WakeWordData(torch.utils.data.Dataset):
 
         try:    
             file_path = self.data.key.iloc[idx]
-            waveform, sr = torchaudio.load(file_path, normalization=False)
+            waveform, sr = torchaudio.load(file_path, normalize=False)
             if sr > self.sr:
                 waveform = torchaudio.transforms.Resample(sr, self.sr)(waveform)
+            #print(f"Loaded file: {file_path}, Shape: {waveform.shape}, Sample Rate: {sr}") # Muestra la información del archivo cargado
             mfcc = self.audio_transform(waveform)
+            # Mostrar el tensor de MFCC calculado
+            #print(f"Computed MFCC, Shape: {mfcc.shape}")
             label = self.data.label.iloc[idx]
 
         except Exception as e:
@@ -139,13 +142,16 @@ def collate_fn(data):
     labels = []
     for d in data:
         mfcc, label = d
-        mfccs.append(mfcc.squeeze(0).transpose(0, 1))
-        labels.append(label)
+        if mfcc.size(0) > 0:
+            mfccs.append(mfcc.squeeze(0).transpose(0, 1))
+            labels.append(label)
+        else:
+            print("El tensor MFCC tiene una longitud 0.")
 
     # Se rellenan los MFCC para que todos los tensores tengan la misma longitud temporal
     mfccs = nn.utils.rnn.pad_sequence(mfccs, batch_first=True)  # batch, seq_len, feature
     mfccs = mfccs.transpose(0, 1) # seq_len, batch, feature
     mfccs = rand_cut(mfccs)
-    #print(mfccs.shape)
+    #print(mfccs.shape) # Muestra el tensor de los MFCCs
     labels = torch.Tensor(labels)
     return mfccs, labels
