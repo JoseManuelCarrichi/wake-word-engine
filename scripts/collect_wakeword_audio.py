@@ -122,6 +122,7 @@ def main(args):
                     frames.append(data)
                 raise Exception('Grabación terminada')
 
+
     except KeyboardInterrupt:
         print('Interrupción por teclado')
     except Exception as e:
@@ -129,7 +130,7 @@ def main(args):
 
     print('Grabación finalizada...')
      # Guarda el archivo de audio con un nombre único
-    save_path = os.path.join(args.save_path, "{}.wav".format(generate_file_name(args.save_path)))
+    save_path = os.path.join(args.save_path, "{}".format(generate_file_name(args.save_path)))
     listener.save_audio(save_path, frames)
     
 
