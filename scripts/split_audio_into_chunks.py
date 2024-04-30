@@ -9,7 +9,7 @@ def main(args):
          # Cargar el archivo de audio
         audio = AudioSegment.from_file(file)
         # Calcular la longitud de cada fragmento en milisegundos
-        length = (args.seconds * 1000) - 256
+        length = args.seconds * 1000
         # Dividir el archivo de audio en fragmentos
         chunks = make_chunks(audio, length)
         names = []
