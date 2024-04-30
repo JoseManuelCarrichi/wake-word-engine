@@ -18,6 +18,8 @@ def main(args):
     print("tracing model...")
     traced_model = trace(model)
     print("saving to", args.save_path)
+    torch.jit.save(traced_model,args.save_path)
+    print("Good here...")
     traced_model.save(args.save_path)
     print("Done!")
 

@@ -2,14 +2,14 @@ import os
 import argparse
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-
+import soundfile as sf
 def main(args):
 
     def chunk_and_save(file):
          # Cargar el archivo de audio
         audio = AudioSegment.from_file(file)
         # Calcular la longitud de cada fragmento en milisegundos
-        length = args.seconds * 1000 
+        length = (args.seconds * 1000) - 256
         # Dividir el archivo de audio en fragmentos
         chunks = make_chunks(audio, length)
         names = []
@@ -22,6 +22,11 @@ def main(args):
             # Ruta completa para guardar el fragmento
             wav_path = os.path.join(args.save_path, name)
             chunk.export(wav_path, format="wav")
+            # Normalizar la longitud de los segmentos
+            audio, sr = sf.read(wav_path)
+            audio = audio[:31744]
+            sf.write(wav_path,audio,sr)
+
         return names
 
     chunk_and_save(args.audio_file_name)
