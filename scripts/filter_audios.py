@@ -36,10 +36,15 @@ def main(args):
     total = len(os.listdir(args.mainPath))
     for filename in os.listdir(args.mainPath):
         audioPath = os.path.join(args.mainPath, filename)
-        filenamePath = os.path.join(args.savePath, f"{args.label}_{index}.wav" )
-        # Filtrar audio
-        filtrarAudio(audioPath, filenamePath, args.filterPath)
-        print(f"Audio: {index} de {total}")
+        Audio, sample_rate = sf.read(audioPath)
+        longitud = len(Audio)
+        if(longitud == 31744):
+            filenamePath = os.path.join(args.savePath, f"{args.label}_{index}.wav" )
+            # Filtrar audio
+            filtrarAudio(audioPath, filenamePath, args.filterPath)
+            print(f"Audio: {index} de {total}")
+        else:
+            print(f"Audio descartado {filename}")
         index += 1
     
 if __name__ == '__main__':
