@@ -10,6 +10,7 @@ from dataset import WakeWordData, collate_fn
 from model import LSTMWakeWord
 from sklearn.metrics import classification_report
 from tabulate import tabulate
+import matplotlib.pyplot as plt
 
 
 def save_checkpoint(checkpoint_path, model, optimizer, scheduler, model_params, notes=None):
@@ -77,13 +78,14 @@ def train(train_loader, model, optimizer, loss_fn, device, epoch):
     print('avg train loss:', avg_train_loss, "avg train acc", acc)
     report = classification_report(torch.Tensor(labels).numpy(), torch.Tensor(preds).numpy())
     print(report)
-    return acc, report
+    return avg_train_loss, acc, report
 
 
 def main(args):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     torch.manual_seed(1)
-    device = torch.device('cuda' if use_cuda else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda' if use_cuda else 'cpu')
 
     train_dataset = WakeWordData(data_json=args.train_data_json, sample_rate=args.sample_rate, valid=False)
     test_dataset = WakeWordData(data_json=args.test_data_json, sample_rate=args.sample_rate, valid=True)
@@ -114,9 +116,11 @@ def main(args):
     best_train_acc, best_train_report = 0, None
     best_test_acc, best_test_report = 0, None
     best_epoch = 0
+    train_losses = []
+    test_losses = []
     for epoch in range(args.epochs):
         print("\nstarting training with learning rate", optimizer.param_groups[0]['lr'])
-        train_acc, train_report = train(train_loader, model, optimizer, loss_fn, device, epoch)
+        avg_train_loss,train_acc, train_report = train(train_loader, model, optimizer, loss_fn, device, epoch)
         test_acc, test_report = test(test_loader, model, device, epoch)
 
         # record best train and test
@@ -127,7 +131,7 @@ def main(args):
 
         # saves checkpoint if metrics are better than last
         if args.save_checkpoint_path and test_acc >= best_test_acc:
-            checkpoint_path = os.path.join(args.save_checkpoint_path, args.model_name + ".pt")
+            checkpoint_path = os.path.join(args.save_checkpoint_path, args.model_name +"_"+epoch+".pt")
             print("found best checkpoint. saving model as", checkpoint_path)
             save_checkpoint(
                 checkpoint_path, model, optimizer, scheduler, model_params,
@@ -143,8 +147,18 @@ def main(args):
         # print("\ntrain acc:", train_acc, "test acc:", test_acc, "\n",
         #     "best train acc", best_train_acc, "best test acc", best_test_acc)
         print(tabulate(table))
-
+        train_losses.append(avg_train_loss)
+        test_losses.append(test_acc)
         scheduler.step(train_acc)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(1, args.epochs + 1), train_losses, label='Train Loss')
+    plt.plot(range(1, args.epochs + 1), test_losses, label='Test Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training and Test Loss')
+    plt.legend()
+    plt.show()
 
     print("Done Training...")
     print("Best Model Saved to", checkpoint_path)
