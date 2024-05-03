@@ -5,7 +5,7 @@ from model import LSTMWakeWord
 
 def trace(model):
     model.eval()
-    x = torch.rand(80, 1, 40)
+    x = torch.rand(80, 1, 13)
     traced = torch.jit.trace(model, (x))
     return traced
 

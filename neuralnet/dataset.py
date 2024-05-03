@@ -8,7 +8,7 @@ from sonopy import power_spec, mel_spec, mfcc_spec, filterbanks
 # Clase para calcular los coeficientes cepstrales de frecuencia mel (MFCC) de una señal de audio
 class MFCC(nn.Module):
 
-    def __init__(self, sample_rate, fft_size=400, window_stride=(400, 200), num_filt=40, num_coeffs=40):
+    def __init__(self, sample_rate, fft_size=400, window_stride=(400, 200), num_filt=13, num_coeffs=13):
         super(MFCC, self).__init__()
         self.sample_rate = sample_rate
         self.window_stride = window_stride
