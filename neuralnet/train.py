@@ -131,7 +131,7 @@ def main(args):
 
         # saves checkpoint if metrics are better than last
         if args.save_checkpoint_path and test_acc >= best_test_acc:
-            checkpoint_path = os.path.join(args.save_checkpoint_path, args.model_name +"_"+epoch+".pt")
+            checkpoint_path = os.path.join(args.save_checkpoint_path, args.model_name +"_{}.pt".format(epoch))
             print("found best checkpoint. saving model as", checkpoint_path)
             save_checkpoint(
                 checkpoint_path, model, optimizer, scheduler, model_params,
