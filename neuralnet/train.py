@@ -171,7 +171,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Wake Word Training Script")
-    parser.add_argument('--sample_rate', type=int, default=8000, help='sample_rate for data')
+    parser.add_argument('--sample_rate', type=int, default=16000, help='sample_rate for data')
     parser.add_argument('--epochs', type=int, default=100, help='epoch size')
     parser.add_argument('--batch_size', type=int, default=32, help='size of batch')
     parser.add_argument('--eval_batch_size', type=int, default=32, help='size of batch')

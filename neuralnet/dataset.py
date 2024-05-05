@@ -97,7 +97,7 @@ class SpecAugment(nn.Module):
 class WakeWordData(torch.utils.data.Dataset):
     """Load and process wakeword data"""
 
-    def __init__(self, data_json, sample_rate=8000, valid=False):
+    def __init__(self, data_json, sample_rate=16000, valid=False):
         self.sr = sample_rate
         self.data = pd.read_json(data_json, lines=True)
         if valid:
