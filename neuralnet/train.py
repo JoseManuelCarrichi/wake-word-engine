@@ -8,9 +8,10 @@ import torch.utils.data as data
 import torch.optim as optim
 from dataset import WakeWordData, collate_fn
 from model import LSTMWakeWord
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from tabulate import tabulate
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def save_checkpoint(checkpoint_path, model, optimizer, scheduler, model_params, notes=None):
@@ -49,6 +50,14 @@ def test(test_loader, model, device, epoch):
     print('Average test Accuracy:', average_acc, "\n")
     report = classification_report(labels, preds)
     print(report)
+    # Calcular y graficar la matriz de confusión
+    cm = confusion_matrix(labels, preds)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+    plt.xlabel('Clases predichas')
+    plt.ylabel('Clases verdaderas')
+    plt.title('Matriz de confusión (Epoch {})'.format(epoch))
+    plt.show()
     return average_acc, report
 
 
