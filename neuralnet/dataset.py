@@ -4,6 +4,7 @@ import torch.nn as nn
 import torchaudio
 import pandas as pd
 from sonopy import power_spec, mel_spec, mfcc_spec, filterbanks
+import matplotlib.pyplot as plt
 
 # Clase para calcular los coeficientes cepstrales de frecuencia mel (MFCC) de una señal de audio
 class MFCC(nn.Module):
@@ -15,7 +16,9 @@ class MFCC(nn.Module):
         self.fft_size = fft_size
         self.num_filt = num_filt
         self.num_coeffs = num_coeffs
-        self.mfcc = lambda x: mfcc_spec(
+    
+    def mfcc(self, x):
+        return mfcc_spec(
             x, self.sample_rate, self.window_stride,
             self.fft_size, self.num_filt, self.num_coeffs
         )
@@ -77,14 +80,43 @@ class SpecAugment(nn.Module):
 
     def policy1(self, x):
         probability = torch.rand(1, 1).item()
+        # Graficar el espectrograma de x
+        #plt.figure(figsize=(10, 4))
+        # mfcc transpuesto para visualización
+        #plt.imshow(x[0].detach().numpy(), aspect='auto', origin='lower')
+        #plt.ylabel('MFCC Coefficients')
+        #plt.xlabel('Frames')
+        #plt.title('MFCC original')
+        #plt.tight_layout()
+        #plt.show()
         if self.rate > probability:
-            return  self.specaug(x)
+            spec = self.specaug(x)
+            # Grafiar los MFCCs
+            #plt.figure(figsize=(10, 4))
+            # mfcc transpuesto para visualización
+            #plt.imshow(spec[0].detach().numpy(), aspect='auto', origin='lower')
+            #plt.ylabel('MFCC Coefficients')
+            #plt.xlabel('Frames')
+            #plt.title('MFCC policy1')
+            #plt.tight_layout()
+            #plt.show()
+            return  spec
         return x
 
     def policy2(self, x):
         probability = torch.rand(1, 1).item()
         if self.rate > probability:
-            return  self.specaug2(x)
+            spec = self.specaug(x)
+            # Grafiar los MFCCs
+            #plt.figure(figsize=(10, 4))
+            # mfcc transpuesto para visualización
+            #plt.imshow(spec[0].detach().numpy(), aspect='auto', origin='lower')
+            #plt.ylabel('MFCC Coefficients')
+            #plt.xlabel('Frames')
+            #plt.title('MFCC policy2')
+            #plt.tight_layout()
+            #plt.show()
+            return  spec
         return x
 
     def policy3(self, x):
@@ -154,4 +186,13 @@ def collate_fn(data):
     mfccs = rand_cut(mfccs)
     #print(mfccs.shape) # Muestra el tensor de los MFCCs
     labels = torch.Tensor(labels)
+    # Graficar el espectrograma de los MFCCs
+    plt.figure(figsize=(10, 4))
+    # mfcc transpuesto para visualización
+    plt.imshow(mfccs[0].detach().T.numpy(), aspect='auto', origin='lower')
+    plt.ylabel('MFCC Coefficients')
+    plt.xlabel('Frames')
+    plt.title('MFCC')
+    plt.tight_layout()
+    plt.show()
     return mfccs, labels

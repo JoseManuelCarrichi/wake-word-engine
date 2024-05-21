@@ -31,11 +31,12 @@ def binary_accuracy(preds, y):
     return acc
 
 
-def test(test_loader, model, device, epoch):
+def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss()):
     print("\n starting test for epoch %s"%epoch)
     accs = []
     preds = []
     labels = []
+    lossess = []
     with torch.no_grad():
         for idx, (mfcc, label) in enumerate(test_loader):
             mfcc, label = mfcc.to(device), label.to(device)
@@ -44,13 +45,16 @@ def test(test_loader, model, device, epoch):
             acc = binary_accuracy(pred, label)
             preds += torch.flatten(torch.round(pred)).cpu()
             labels += torch.flatten(label).cpu()
+            loss = loss_fn(torch.flatten(output), label)
+            lossess.append(loss.item())
             accs.append(acc)
             print("Iter: {}/{}, accuracy: {}".format(idx, len(test_loader), acc), end="\r")
-    average_acc = sum(accs)/len(accs) 
+    average_acc = sum(accs)/len(accs)
+    average_loss = sum(lossess)/len(lossess) 
     print('Average test Accuracy:', average_acc, "\n")
     report = classification_report(labels, preds)
     print(report)
-    # Calcular y graficar la matriz de confusión
+    # Calcular y graficar la matriz de confusión. Luego guardarla en un archivo
     cm = confusion_matrix(labels, preds)
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
@@ -58,7 +62,7 @@ def test(test_loader, model, device, epoch):
     plt.ylabel('Clases verdaderas')
     plt.title('Matriz de confusión (Epoch {})'.format(epoch))
     plt.show()
-    return average_acc, report
+    return average_acc, average_loss,report
 
 
 def train(train_loader, model, optimizer, loss_fn, device, epoch):
@@ -95,6 +99,7 @@ def main(args):
     torch.manual_seed(1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #device = torch.device('cuda' if use_cuda else 'cpu')
+    print("Using device", device)
 
     train_dataset = WakeWordData(data_json=args.train_data_json, sample_rate=args.sample_rate, valid=False)
     test_dataset = WakeWordData(data_json=args.test_data_json, sample_rate=args.sample_rate, valid=True)
@@ -130,7 +135,7 @@ def main(args):
     for epoch in range(args.epochs):
         print("\nstarting training with learning rate", optimizer.param_groups[0]['lr'])
         avg_train_loss,train_acc, train_report = train(train_loader, model, optimizer, loss_fn, device, epoch)
-        test_acc, test_report = test(test_loader, model, device, epoch)
+        test_acc,avg_test_loss, test_report = test(test_loader, model, device, epoch)
 
         # record best train and test
         if train_acc > best_train_acc:
@@ -157,7 +162,7 @@ def main(args):
         #     "best train acc", best_train_acc, "best test acc", best_test_acc)
         print(tabulate(table))
         train_losses.append(avg_train_loss)
-        test_losses.append(test_acc)
+        test_losses.append(avg_test_loss)
         scheduler.step(train_acc)
 
     plt.figure(figsize=(10, 5))
@@ -165,7 +170,7 @@ def main(args):
     plt.plot(range(1, args.epochs + 1), test_losses, label='Test Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Training and Test Loss')
+    plt.title('Training and Test Accuracy over Epochs')
     plt.legend()
     plt.show()
 
