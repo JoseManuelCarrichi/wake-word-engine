@@ -174,7 +174,7 @@ def main(args):
     plt.ylabel('Pérdida')
     plt.title('Pérdida de entrenamiento y validación por época')
     plt.legend()
-    plt.savefig(os.path.join(args.save_graphics, 'loss_plot_{}.png').format(args.model_name))
+    plt.savefig('loss_plot_{}.png').format(args.model_name)
     plt.show()
 
     print("Done Training...")
