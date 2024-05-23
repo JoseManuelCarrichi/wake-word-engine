@@ -31,7 +31,7 @@ def binary_accuracy(preds, y):
     return acc
 
 
-def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss(), save_graphics=None):
+def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss()):
     print("\n starting test for epoch %s"%epoch)
     accs = []
     preds = []
@@ -62,8 +62,7 @@ def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss(), save_
     plt.ylabel('Clase verdadera')
     plt.title('Matriz de confusión (Época {})'.format(epoch))
     # Guardar la matriz de confusión en un archivo
-    if save_graphics:
-        plt.savefig(os.path.join(save_graphics, 'confusion_matrix_epoch_{}.png'.format(epoch)))
+    plt.savefig('confusion_matrix{}.png'.format(epoch))
     plt.show()
     return average_acc, average_loss,report
 
@@ -138,7 +137,7 @@ def main(args):
     for epoch in range(args.epochs):
         print("\nstarting training with learning rate", optimizer.param_groups[0]['lr'])
         avg_train_loss,train_acc, train_report = train(train_loader, model, optimizer, loss_fn, device, epoch)
-        test_acc,avg_test_loss, test_report = test(test_loader, model, device, epoch, args.save_graphics)
+        test_acc,avg_test_loss, test_report = test(test_loader, model, device, epoch)
 
         # record best train and test
         if train_acc > best_train_acc:
@@ -175,8 +174,7 @@ def main(args):
     plt.ylabel('Pérdida')
     plt.title('Pérdida de entrenamiento y validación por época')
     plt.legend()
-    if args.save_graphics:
-        plt.savefig(os.path.join(args.save_graphics, 'loss_plot_{}.png').format(args.model_name))
+    plt.savefig(os.path.join(args.save_graphics, 'loss_plot_{}.png').format(args.model_name))
     plt.show()
 
     print("Done Training...")
@@ -202,7 +200,6 @@ if __name__ == "__main__":
     parser.add_argument('--no_cuda', action='store_true', default=False, help='disables CUDA training')
     parser.add_argument('--num_workers', type=int, default=1, help='number of data loading workers')
     parser.add_argument('--hidden_size', type=int, default=128, help='lstm hidden size')
-    parser.add_argument('--save_graphics', type=str, default=None, required=True, help='Path to save graphics')
 
     args = parser.parse_args()
 
