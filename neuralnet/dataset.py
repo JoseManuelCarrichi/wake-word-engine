@@ -26,7 +26,9 @@ class MFCC(nn.Module):
     # Función para obtener un objeto MFCC para un sample_rate dado
     def forward(self, x):
         # Calcula los MFCC y ajusta la forma del tensor resultante
-        return torch.Tensor(self.mfcc(x.squeeze(0).numpy())).transpose(0, 1).unsqueeze(0)
+        mfcc_tensor = torch.Tensor(self.mfcc(x.squeeze(0).numpy())).transpose(0, 1).unsqueeze(0)
+        print(f"MFCC Tensor Shape: {mfcc_tensor.shape}")  # Añadir esta línea para ver la forma del tensor
+        return mfcc_tensor
 
 
 def get_featurizer(sample_rate):
@@ -154,6 +156,7 @@ class WakeWordData(torch.utils.data.Dataset):
                 waveform = torchaudio.transforms.Resample(sr, self.sr)(waveform)
             #print(f"Loaded file: {file_path}, Shape: {waveform.shape}, Sample Rate: {sr}") # Muestra la información del archivo cargado
             mfcc = self.audio_transform(waveform)
+            print(f"MFCC Tensor Shape: {mfcc.shape}")
             # Mostrar el tensor de MFCC calculado
             #print(f"Computed MFCC, Shape: {mfcc.shape}")
             label = self.data.label.iloc[idx]
@@ -187,12 +190,12 @@ def collate_fn(data):
     #print(mfccs.shape) # Muestra el tensor de los MFCCs
     labels = torch.Tensor(labels)
     # Graficar el espectrograma de los MFCCs
-    plt.figure(figsize=(10, 4))
+    #plt.figure(figsize=(10, 4))
     # mfcc transpuesto para visualización
-    plt.imshow(mfccs[0].detach().T.numpy(), aspect='auto', origin='lower')
-    plt.ylabel('MFCC Coefficients')
-    plt.xlabel('Frames')
-    plt.title('MFCC')
-    plt.tight_layout()
-    plt.show()
+    #plt.imshow(mfccs[0].detach().T.numpy(), aspect='auto', origin='lower')
+    #plt.ylabel('MFCC Coefficients')
+    #plt.xlabel('Frames')
+    #plt.title('MFCC')
+    #plt.tight_layout()
+    #plt.show()
     return mfccs, labels

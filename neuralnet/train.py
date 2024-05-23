@@ -31,7 +31,7 @@ def binary_accuracy(preds, y):
     return acc
 
 
-def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss()):
+def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss(), save_graphics=None):
     print("\n starting test for epoch %s"%epoch)
     accs = []
     preds = []
@@ -58,9 +58,12 @@ def test(test_loader, model, device, epoch,loss_fn=nn.BCEWithLogitsLoss()):
     cm = confusion_matrix(labels, preds)
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-    plt.xlabel('Clases predichas')
-    plt.ylabel('Clases verdaderas')
-    plt.title('Matriz de confusión (Epoch {})'.format(epoch))
+    plt.xlabel('Clase predicha')
+    plt.ylabel('Clase verdadera')
+    plt.title('Matriz de confusión (Época {})'.format(epoch))
+    # Guardar la matriz de confusión en un archivo
+    if save_graphics:
+        plt.savefig(os.path.join(save_graphics, 'confusion_matrix_epoch_{}.png'.format(epoch)))
     plt.show()
     return average_acc, average_loss,report
 
@@ -135,7 +138,7 @@ def main(args):
     for epoch in range(args.epochs):
         print("\nstarting training with learning rate", optimizer.param_groups[0]['lr'])
         avg_train_loss,train_acc, train_report = train(train_loader, model, optimizer, loss_fn, device, epoch)
-        test_acc,avg_test_loss, test_report = test(test_loader, model, device, epoch)
+        test_acc,avg_test_loss, test_report = test(test_loader, model, device, epoch, args.save_graphics)
 
         # record best train and test
         if train_acc > best_train_acc:
@@ -166,12 +169,14 @@ def main(args):
         scheduler.step(train_acc)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(range(1, args.epochs + 1), train_losses, label='Train Loss')
-    plt.plot(range(1, args.epochs + 1), test_losses, label='Test Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.title('Training and Test Accuracy over Epochs')
+    plt.plot(range(1, args.epochs + 1), train_losses, label='Pérdida de entrenamiento')
+    plt.plot(range(1, args.epochs + 1), test_losses, label='Pérdida de validación')
+    plt.xlabel('Época')
+    plt.ylabel('Pérdida')
+    plt.title('Pérdida de entrenamiento y validación por época')
     plt.legend()
+    if args.save_graphics:
+        plt.savefig(os.path.join(args.save_graphics, 'loss_plot_{}.png').format(args.model_name))
     plt.show()
 
     print("Done Training...")
@@ -197,6 +202,7 @@ if __name__ == "__main__":
     parser.add_argument('--no_cuda', action='store_true', default=False, help='disables CUDA training')
     parser.add_argument('--num_workers', type=int, default=1, help='number of data loading workers')
     parser.add_argument('--hidden_size', type=int, default=128, help='lstm hidden size')
+    parser.add_argument('--save_graphics', type=str, default=None, required=True, help='Path to save graphics')
 
     args = parser.parse_args()
 

@@ -136,7 +136,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Grabaciones de audio para entrenamiento de palabras de activación")
-    parser.add_argument('--sample_rate', type=int, default=8000,
+    parser.add_argument('--sample_rate', type=int, default=16000,
                         help='the sample_rate to record at')
     parser.add_argument('--seconds', type=int, default=None,
                         help='if set to None, then will record forever until keyboard interrupt')
