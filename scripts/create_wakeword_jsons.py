@@ -35,28 +35,32 @@ def main(args):
         })
     # Barajar los datos
     random.shuffle(data)
-
+    percent_data = int(len(data)*percent/100) 
+    print("Total de datos: ",len(data))
+    
     f = open(args.save_json_path +"/"+ "train.json", "w")
     
     with open(args.save_json_path +"/"+ 'train.json','w') as f:
         d = len(data)
         i=0
-        while(i<int(d-d/percent)):
+        while(i<len(data)-percent_data):
             r=data[i]
             line = json.dumps(r)
             f.write(line + "\n")
             i = i+1
+        print("Datos de entrenamiento: ",i)
     
     f = open(args.save_json_path +"/"+ "test.json", "w")
 
     with open(args.save_json_path +"/"+ 'test.json','w') as f:
         d = len(data)
-        i=int(d-d/percent)
+        i=len(data)-percent_data
         while(i<d):
             r=data[i]
             line = json.dumps(r)
             f.write(line + "\n")
             i = i+1
+        print("Datos de test: ",i-(len(data)-percent_data))
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="script para crear archivos json de entrenamiento para wakeword")
